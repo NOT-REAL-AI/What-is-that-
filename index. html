@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Интерактивный экспресс-сюрприз</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* Добавляет лёгкий эффект "секретности", но можно выделять */
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 10% 20%, #0a0f1e, #03060c);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', 'Fira Code', monospace;
+            padding: 20px;
+        }
+
+        /* Невидимый контейнер, который раскроется */
+        .mystery-box {
+            max-width: 1300px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(12px);
+            border-radius: 68px;
+            border: 1px solid rgba(255, 220, 100, 0.4);
+            box-shadow: 0 25px 45px rgba(0,0,0,0.6), 0 0 0 2px rgba(255,200,50,0.1) inset;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Шапка-загадка */
+        .cryptic-header {
+            background: #000000aa;
+            padding: 2rem 2rem 1rem 2rem;
+            text-align: center;
+            border-bottom: 2px dashed #ffd966;
+        }
+
+        .cryptic-header h1 {
+            font-size: 2.3rem;
+            letter-spacing: 6px;
+            color: #ffeaac;
+            text-shadow: 0 0 8px #ff9f00;
+            font-weight: 800;
+            word-break: keep-all;
+        }
+
+        .cryptic-header p {
+            color: #cfcfaa;
+            margin-top: 12px;
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+
+        .glitch-pulse {
+            animation: softPulse 2s infinite;
+        }
+
+        @keyframes softPulse {
+            0% { opacity: 0.7; text-shadow: 0 0 0px gold;}
+            100% { opacity: 1; text-shadow: 0 0 6px #ffb347;}
+        }
+
+        /* основная секция: СЮРПРИЗ */
+        .main-weirdness {
+            padding: 40px 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .card-panel {
+            flex: 2;
+            min-width: 260px;
+            background: rgba(20, 20, 35, 0.7);
+            border-radius: 48px;
+            padding: 28px 22px;
+            backdrop-filter: blur(5px);
+            border: 1px solid #ffdd8844;
+            box-shadow: 0 20px 32px -12px black;
+        }
+
+        .action-zone {
+            flex: 1.2;
+            min-width: 260px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 48px;
+            padding: 28px 22px;
+            text-align: center;
+            border: 1px solid #bfff80;
+        }
+
+        /* анимированные элементы, которые не выдают тему сразу */
+        .secret-counter {
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-align: center;
+            font-family: monospace;
+            background: linear-gradient(135deg, #f0e68c, #ffb347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 20px 0;
+        }
+
+        .mystery-button {
+            background: #2c2e3a;
+            border: none;
+            padding: 18px 32px;
+            margin: 16px 8px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            border-radius: 60px;
+            color: #ffdfa5;
+            font-family: monospace;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 5px 0 #0a0a12;
+            border: 1px solid #ffcc77;
+        }
+
+        .mystery-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #0a0a12;
+        }
+
+        .surprise-area {
+            background: #01010166;
+            border-radius: 36px;
+            padding: 22px;
+            margin-top: 28px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            transition: 0.2s;
+            border: 1px dashed #ffae70;
+            color: #fff2cf;
+        }
+
+        .secret-gallery {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 25px 0 10px;
+        }
+
+        .card-item {
+            background: #121212dd;
+            border-radius: 26px;
+            padding: 15px 12px;
+            width: 120px;
+            text-align: center;
+            transition: 0.2s;
+            cursor: pointer;
+            border: 1px solid gold;
+        }
+
+        .card-item:hover {
+            transform: scale(1.02);
+            background: #2a2416;
+        }
+
+        .emoji-big {
+            font-size: 3rem;
+            display: block;
+        }
+
+        .footer-quote {
+            background: #00000099;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #aaa985;
+            letter-spacing: 1px;
+        }
+
+        .blink-warning {
+            background: #ff880022;
+            border-radius: 20px;
+            padding: 8px;
+        }
+
+        @keyframes wiggle {
+            0%,100%{ transform: rotate(0deg); }
+            25%{ transform: rotate(2deg); }
+            75%{ transform: rotate(-2deg); }
+        }
+
+        .wiggle-once {
+            animation: wiggle 0.2s ease-in-out 2;
+        }
+
+        @media (max-width: 750px) {
+            .cryptic-header h1 { font-size: 1.5rem; letter-spacing: 2px; }
+            .mystery-button { padding: 12px 20px; font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="mystery-box">
+    <div class="cryptic-header">
+        <h1 class="glitch-pulse">⚠︎ [ СИСТЕМА СЕКРЕТНЫХ ДАННЫХ ] ⚠︎</h1>
+        <p>✦ интерактивный экспериментальный модуль ✦ <br> нажми на всё, что движется — или не двигается</p>
+    </div>
+
+    <div class="main-weirdness">
+        <!-- левая колонка: сюрпризная механика -->
+        <div class="card-panel">
+            <div style="font-size: 1.8rem; text-align: center; margin-bottom: 8px;">🌀🔮🌀</div>
+            <h3 style="color:#ffcf8a; text-align:center; margin-bottom: 18px;">Генератор неожиданностей</h3>
+            <div class="secret-counter" id="mysteryValue">???</div>
+            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <button class="mystery-button" id="btnAction1">🌠 РАЗБЛОКИРОВАТЬ</button>
+                <button class="mystery-button" id="btnAction2">🔮 АКТИВИРОВАТЬ СЮРПРИЗ</button>
+            </div>
+            <div class="surprise-area" id="outputZone">
+                ✨ Нажми на любую кнопку ✨
+            </div>
+            <div style="margin-top: 25px; font-size:0.9rem; text-align:center; color:#ffcf9a;">
+                ⚡ Каждое нажатие меняет реальность
+            </div>
+        </div>
+
+        <!-- правая колонка: неожиданные объекты и коллекция -->
+        <div class="action-zone">
+            <div style="font-size: 2rem;">🎁🎲🎭</div>
+            <h3 style="color:#b9f6ca; margin-bottom: 12px;">Коллекция эфемерных артефактов</h3>
+            <div class="secret-gallery" id="artifactGrid">
+                <!-- динамические карточки генерируются скриптом, но начально простые элементы -->
+            </div>
+            <div class="blink-warning" style="margin-top: 15px;">
+                <span id="clickCounterDisplay">👆 кликов по артефактам: 0</span>
+            </div>
+            <button class="mystery-button" id="resetArtifactsBtn" style="padding: 8px 18px; font-size:1rem; margin-top: 8px;">⟳ пересобрать реликвии</button>
+        </div>
+    </div>
+
+    <div class="footer-quote">
+        <span id="dynamicFooter">✦ секретный узел ✦  ничего не предсказуемо ✦ 24/7 ✦</span>
+    </div>
+</div>
+
+<script>
+    // =============== ТАЙНАЯ ТЕМА: НЕОЖИДАННЫЙ ТЕАТР АБСУРДА ===============
+    // Никаких носорогов, никакой пиццы. Это "сюрреалистическая галерея изменчивых сущностей"
+    // с уникальными реакциями на кнопки. Каждый клик — новый поворот.
+    
+    // Массив необычных вариантов для "генератора неожиданностей"
+    const mysteryReplies = [
+        "🐙 Осьминог-дирижёр машет палочкой! БРАВО!",
+        "🍕 Пицца с ананасами и мангостангами — доставлена сквозь时空.",
+        "📡 Ваша клавиатура получила сигнал из будущего: 'привет, 2036 год'",
+        "🦷 Зубная фея в скафандре требует налог пыльцой.",
+        "🌋 Вулкан попкорна извергает солёную карамель. УРА!",
+        "🎭 Невидимый театр теней: сейчас играют 'Война котов с фенами'",
+        "💎 Найден артефакт: 'Кристалл внезапности' +100 к недоумению",
+        "🚀 Космическая черепаха приземлилась в ваш дом. Чай пить будет?",
+        "🎲 Выпало число 42 — ответ на всё, кроме этого сообщения.",
+        "🍄 Гриб-телепорт перенёс вашу кнопку в другое измерение. Эффект есть!",
+        "🔊 Ваши колонки прошептали: 'купи хлеба, но в другом мире'",
+        "🎈 Воздушный шарик в форме кода HTML лопнул, рассыпав ✨✨.",
+        "🦥 Ленивец-программист почти доделал сайт, но уснул. Обновление позже.",
+        "🌀 Парадокс Бабочки: сейчас где-то идет дождь из конфетти!"
+    ];
+
+    // Дополнительные варианты для второго нажатия (комбинации)
+    const secondLayerSecrets = [
+        "⚡ Молния окрасилась в розовый! ⚡",
+        "📼 Видеокассета перемотала прошлое: вы съели печенье, которого не было.",
+        "🪄 Магический кролик вытащил шляпу из фокусника — всё сложно.",
+        "🎵 Играет мелодия из дверного звонка в стиле Lo-fi хип-хоп.",
+        "🌿 Комнатное растение начало говорить стихами Хармса.",
+        "📱 Ваш телефон получил смс: 'я не робот, вы робот? ответьте левым локтем'",
+        "🍦 Мороженое в виде вопросительного знака тает, не тая.",
+        "🕹️ Найден баг в реальности: нажмите F5 для продолжения абсурда."
+    ];
+
+    // Для артефактов — набор супер-неожиданных предметов (16 штук, показываем по 5-6 случайных)
+    const allPossibleArtifacts = [
+        { emoji: "🧽", name: "Губка-парадокс", desc: "впитывает неизвестность" },
+        { emoji: "🪣", name: "Ведро идей", desc: "оттуда лезет всё" },
+        { emoji: "🧲", name: "Магнит для совпадений", desc: "притягивает странное" },
+        { emoji: "📀", name: "Лазерный диск с секретом" },
+        { emoji: "🔦", name: "Фонарик, светящий тьмой" },
+        { emoji: "🧬", name: "Пробирка хаоса" },
+        { emoji: "⚙️", name: "Шестерёнка фортуны" },
+        { emoji: "🎛️", name: "Панель глюков" },
+        { emoji: "🧿", name: "Глаз неопределённости" },
+        { emoji: "🎐", name: "Колокольчик параллельной вселенной" },
+        { emoji: "🪶", name: "Перо правдоподобной лжи" },
+        { emoji: "🥄", name: "Ложка для эфира" },
+        { emoji: "📦", name: "Ящик Пандоры (приоткрыт)" },
+        { emoji: "🕰️", name: "Часы-перевёртыш" },
+        { emoji: "🧩", name: "Пазл-невидимка" },
+        { emoji: "🌡️", name: "Градусник безумия" }
+    ];
+
+    let artifactsList = [];      // текущий список отображаемых артефактов (5-6 шт)
+    let clickOnArtifactsCount = 0;
+    let fusionModeActive = false; // маленький секретный режим (двойной клик)
+
+    // DOM элементы
+    const mysteryValueSpan = document.getElementById('mysteryValue');
+    const outputZone = document.getElementById('outputZone');
+    const btn1 = document.getElementById('btnAction1');
+    const btn2 = document.getElementById('btnAction2');
+    const artifactGrid = document.getElementById('artifactGrid');
+    const clickCounterSpan = document.getElementById('clickCounterDisplay');
+    const resetArtifactsBtn = document.getElementById('resetArtifactsBtn');
+    const dynamicFooter = document.getElementById('dynamicFooter');
+
+    // Функция обновления текста mysteryValue (случайное число/фраза)
+    function updateMysteryDisplay() {
+        const randomOption = Math.floor(Math.random() * 100);
+        if (randomOption < 30) {
+            mysteryValueSpan.innerText = `❓❓${Math.floor(Math.random() * 9999)}❓❓`;
+        } else if (randomOption < 60) {
+            mysteryValueSpan.innerText = `⚡${Math.random().toString(36).substring(2, 6)}⚡`;
+        } else {
+            mysteryValueSpan.innerText = `🔄 ${Math.floor(Math.random() * 999)}% неожиданности`;
+        }
+    }
+
+    // Главная сюрпризная функция для первой кнопки (РАЗБЛОКИРОВАТЬ)
+    function actionUnlock() {
+        const randomMsg = mysteryReplies[Math.floor(Math.random() * mysteryReplies.length)];
+        const extra = Math.random() > 0.7 ? ` ▸ секретный код: ${Math.floor(Math.random()*9999)}` : '';
+        outputZone.innerHTML = `🔓 РАЗБЛОКИРОВАНО: ${randomMsg}${extra}`;
+        outputZone.style.background = "#2c1a0faa";
+        outputZone.style.border = "2px solid #f3b33d";
+        updateMysteryDisplay();
+        dynamicFooter.innerText = `✦ последняя разблокировка: ${new Date().toLocaleTimeString()} ✦`;
+        // добавить тряску кнопки
+        btn1.classList.add('wiggle-once');
+        setTimeout(() => btn1.classList.remove('wiggle-once'), 300);
+        // иногда дополнительный эффект
+        if(Math.random() > 0.8) {
+            setTimeout(() => { outputZone.innerHTML += `<br>🌀 [системный шепот] : "лучше не спрашивай как это работает"`; }, 150);
+        }
+    }
+
+    // Вторая кнопка — активатор сюрприза (комбинированные эффекты + неожиданные последствия)
+    function actionSurprise() {
+        const r = Math.random();
+        let surpriseMessage = "";
+        if (r < 0.5) {
+            surpriseMessage = secondLayerSecrets[Math.floor(Math.random() * secondLayerSecrets.length)];
+        } else if (r < 0.8) {
+            surpriseMessage = `✨✨ ВИРТУАЛЬНЫЙ КОНФЕТТИ-ДОЖДЬ ✨✨  + ${Math.floor(Math.random()*100)} ед. абсурда`;
+        } else {
+            surpriseMessage = `🕹️ Активирован "режим сновидения": на экране появилась тень неизвестного зверя. 🐉`;
+        }
+        outputZone.innerHTML = `🎇 СЮРПРИЗ! 🎇 <br> ➤ ${surpriseMessage}`;
+        outputZone.style.background = "#2a1e2caa";
+        outputZone.style.border = "2px solid #da77f2";
+        updateMysteryDisplay();
+        dynamicFooter.innerText = `⚡ сюрприз активирован в ${new Date().toLocaleTimeString()} ⚡`;
+
+        // Дополнительная неожиданность — иногда меняет артефакт случайно
+        if (Math.random() > 0.65 && artifactsList.length > 0) {
+            const randomIndex = Math.floor(Math.random() * artifactsList.length);
+            const randomArt = allPossibleArtifacts[Math.floor(Math.random() * allPossibleArtifacts.length)];
+            artifactsList[randomIndex] = { ...randomArt, isSpecial: true };
+            renderArtifacts();
+            outputZone.innerHTML += `<br>🔀 + артефакт "${randomArt.name}" мутировал на месте!`;
+        }
+
+        btn2.classList.add('wiggle-once');
+        setTimeout(() => btn2.classList.remove('wiggle-once'), 300);
+    }
+
+    // Отрисовка артефактов (секретная коллекция)
+    function renderArtifacts() {
+        if (!artifactGrid) return;
+        artifactGrid.innerHTML = '';
+        for (let i = 0; i < artifactsList.length; i++) {
+            const art = artifactsList[i];
+            const card = document.createElement('div');
+            card.className = 'card-item';
+            card.setAttribute('data-artifact-idx', i);
+            card.innerHTML = `
+                <span class="emoji-big">${art.emoji || '🧿'}</span>
+                <strong style="display:block; font-size:0.9rem;">${art.name || 'Нечто'}</strong>
+                <small style="font-size:0.7rem; opacity:0.7;">${art.desc || 'нажми для исследования'}</small>
+            `;
+            card.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // при клике на артефакт — новое сообщение и увеличение счетчика
+                clickOnArtifactsCount++;
+                clickCounterSpan.innerHTML = `👆 кликов по артефактам: ${clickOnArtifactsCount}`;
+                const artifactName = art.name || 'неизвестный объект';
+                const randomOutcome = [
+                    `Вы исследуете ${artifactName} и находите внутри 🎫 билет в никуда.`,
+                    `${artifactName} издаёт звук: "бзз-щщщ-ух" и светится.`,
+                    `Артефакт ${artifactName} распадается на 3 радужных пикселя.`,
+                    `Вы чувствуете, что ${artifactName} содержит послание: "всё идёт по плану".`,
+                    `${artifactName} прыгает в сторону и сливается с фоном! Но возвращается.`
+                ];
+                const chosen = randomOutcome[Math.floor(Math.random() * randomOutcome.length)];
+                outputZone.innerHTML = `🔍 [АРТЕФАКТ] ${chosen}`;
+                outputZone.style.background = "#1e2a2caa";
+                setTimeout(() => {
+                    if(outputZone.innerHTML.includes('АРТЕФАКТ')) {
+                        // можно оставить, но через 2 сек сброс не жесткий, просто успокоение
+                    }
+                }, 20);
+                updateMysteryDisplay();
+                dynamicFooter.innerText = `📜 исследован артефакт: ${artifactName.substring(0,20)}`;
+                // анимация карточки
+                card.classList.add('wiggle-once');
+                setTimeout(() => card.classList.remove('wiggle-once'), 200);
+            });
+            artifactGrid.appendChild(card);
+        }
+        if(artifactsList.length === 0){
+            artifactGrid.innerHTML = '<div style="color:#aaa; padding:20px;">нет артефактов, нажми "пересобрать реликвии"</div>';
+        }
+    }
+
+    // Функция генерации случайного набора артефактов (от 4 до 7 штук)
+    function generateRandomArtifacts() {
+        const count = Math.floor(Math.random() * 5) + 4; // 4-8 штук
+        const shuffled = [...allPossibleArtifacts];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        const selected = shuffled.slice(0, count);
+        artifactsList = selected.map(item => ({ ...item, desc: item.desc || 'реликварий чуда' }));
+        renderArtifacts();
+    }
+
+    // сброс артефактов со счётчиком (Кнопка пересобрать реликвии)
+    function resetArtifactsCollection() {
+        generateRandomArtifacts();
+        // не обнуляем все клики, но можно добавить сообщение
+        outputZone.innerHTML = `🌀 Коллекция артефактов полностью обновлена! Теперь здесь ${artifactsList.length} таинственных предметов.`;
+        outputZone.style.background = "#18382caa";
+        dynamicFooter.innerText = `🔁 пересборка реликвий в ${new Date().toLocaleTimeString()}`;
+        // легкий сброс счетчика не делаем, но прикольно сохранить историю кликов.
+        clickCounterSpan.innerHTML = `👆 кликов по артефактам: ${clickOnArtifactsCount} (история)`;
+    }
+
+    // секретная дополнительная ф-ция: двойной клик по футеру меняет всё оформление и добавляет режим "хаос"
+    function initEasterEggs() {
+        dynamicFooter.addEventListener('dblclick', () => {
+            document.body.style.background = "radial-gradient(circle at 30% 10%, #221c2e, #03001c)";
+            const box = document.querySelector('.mystery-box');
+            if(box) box.style.border = "3px solid rgb(255, 80, 200)";
+            outputZone.innerHTML = "🥚🥚 ПАСХАЛЬНОЕ ЯЙЦО! Режим психо-декора активирован. Теперь всё стало ещё страннее! 🥚🥚";
+            dynamicFooter.innerText = "⚡⚡ СУПЕР СЕКРЕТНЫЙ РЕЖИМ: АБСУРД ПОВЫШЕН ⚡⚡";
+            setTimeout(() => {
+                if(box) box.style.border = "1px solid rgba(255, 220, 100, 0.4)";
+            }, 2000);
+        });
+        // маленькая фишка: если нажать на mysteryValueSpan, там выпадает тост?
+        mysteryValueSpan.addEventListener('click', () => {
+            const randomToast = ['🔮 вы активировали скрытый канал', '🌀 тайна удвоена', '✨ вы чуток приблизились к разгадке, но её нет'];
+            outputZone.innerHTML = `💡 ${randomToast[Math.floor(Math.random()*randomToast.length)]}`;
+        });
+    }
+
+    // инициализация всех систем
+    function init() {
+        updateMysteryDisplay();
+        generateRandomArtifacts();   // первый случайный набор
+        btn1.addEventListener('click', actionUnlock);
+        btn2.addEventListener('click', actionSurprise);
+        resetArtifactsBtn.addEventListener('click', () => {
+            resetArtifactsCollection();
+        });
+        initEasterEggs();
+        // начальное сообщение в outputZone
+        outputZone.innerHTML = "✨ ДОБРО ПОЖАЛОВАТЬ В ЗОНУ НЕОЖИДАННОСТЕЙ ✨<br> Кнопки, артефакты, клики — всё ведёт к абсурду!";
+        dynamicFooter.innerText = "✦ щёлкни дважды по футеру, если хочешь хаоса ✦";
+    }
+
+    init();
+</script>
+</body>
+</html>
